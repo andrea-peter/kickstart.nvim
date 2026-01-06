@@ -18,6 +18,17 @@ return {
   ---@module 'neo-tree'
   ---@type neotree.Config
   opts = {
+    window = {
+      mappings = {
+        -- Open node with 'l' and close with 'h'
+        ['l'] = 'open',
+        ['h'] = 'close_node',
+        -- Don't close neotree
+        ['q'] = 'noop',
+        -- We use space as leader
+        ['<space>'] = 'noop',
+      },
+    },
     filesystem = {
       window = {
         mappings = {
