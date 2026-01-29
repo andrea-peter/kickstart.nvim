@@ -926,6 +926,7 @@ require('lazy').setup({
   vim.keymap.set('n', ']h', '<cmd>:Gitsigns next_hunk<CR>'),
   vim.keymap.set('n', '[h', '<cmd>:Gitsigns prev_hunk<CR>'),
 
+  vim.keymap.set('n', '<leader>fn', '<cmd>enew<cr>', { desc = 'New File' }),
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
   -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
