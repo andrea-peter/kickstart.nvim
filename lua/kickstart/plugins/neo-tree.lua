@@ -18,6 +18,23 @@ return {
   ---@module 'neo-tree'
   ---@type neotree.Config
   opts = {
+    default_component_configs = {
+      file_size = {
+        enabled = false,
+      },
+      type = {
+        enabled = false,
+      },
+      last_modified = {
+        enabled = false,
+      },
+      created = {
+        enabled = false,
+      },
+      symlink_target = {
+        enabled = true,
+      },
+    },
     window = {
       mappings = {
         -- Open node with 'l' and close with 'h'
@@ -30,6 +47,11 @@ return {
       },
     },
     filesystem = {
+      bind_to_cwd = true,
+      follow_current_file = {
+        enabled = true,
+        leave_dirs_open = true,
+      },
       window = {
         mappings = {
           ['\\'] = 'close_window',
