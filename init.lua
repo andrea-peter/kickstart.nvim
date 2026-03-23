@@ -642,6 +642,49 @@ require('lazy').setup({
             Lua = {},
           },
         },
+        pylsp = {
+          settings = {
+            pylsp = {
+              configurationSources = { 'flake8' },
+              -- https://github.com/python-lsp/python-lsp-server/blob/develop/CONFIGURATION.md
+              plugins = {
+                -- formatter
+                autopep8 = { enabled = false },
+                -- black must be installed with 'lspinstall', see https://github.com/williamboman/mason-lspconfig.nvim
+                black = { enabled = true }, -- This is an external plugin
+                yapf = { enabled = false },
+                -- linter
+                flake8 = { enabled = true },
+                pycodestyle = { enabled = false },
+                pydocstyle = {
+                  enabled = false,
+                  convention = 'numpy',
+                  -- convention = "google",
+                  -- convention = "pep257",
+                },
+                pyflakes = { enabled = false },
+                pylint = { enabled = false },
+                -- type checker
+                pylsp_mypy = { enabled = true },
+                -- autocompletion
+                jedi_completion = { enabled = true }, -- TODO explore this more
+                -- import sorting
+                pylsp_isort = { enabled = true }, -- executable = "isort" },
+                -- refactoring
+                rope = {
+                  rope_autoimport = {
+                    code_actions = { enabled = true },
+                    completions = { enabled = true },
+                  },
+                },
+                -- other
+                mccabe = { enabled = false },
+              },
+            },
+          },
+        },
+        -- Ruff is not (yet) able to refactor code
+        -- ruff = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -875,7 +918,7 @@ require('lazy').setup({
     branch = 'main',
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'yaml' }
       require('nvim-treesitter').install(parsers)
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
