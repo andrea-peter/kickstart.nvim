@@ -320,6 +320,9 @@ require('lazy').setup({
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
         { 'gr', group = 'LSP Actions', mode = { 'n' } },
+        -- TODO put this in lazy.lua
+        { '<leader>u', group = '[U]ser interface', mode = { 'n' } },
+        { '<leader>uf', group = 'Auto[f]ormat', mode = { 'n' } },
       },
     },
   },
@@ -726,24 +729,11 @@ require('lazy').setup({
     ---@module 'conform'
     ---@type conform.setupOpts
     opts = {
+      default_format_opts = {
+        -- Whether/how to use LSP to format
+        lsp_format = 'fallback',
+      },
       notify_on_error = false,
-      format_on_save = function(bufnr)
-        -- Disable "format_on_save lsp_fallback" for languages that don't
-        -- have a well standardized coding style. You can add additional
-        -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          return nil
-        -- Don't format if disabled globally or in buffer
-        elseif vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
-          return
-        else
-          return {
-            timeout_ms = 500,
-            lsp_format = 'fallback',
-          }
-        end
-      end,
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
@@ -959,7 +949,7 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
@@ -975,7 +965,7 @@ require('lazy').setup({
   vim.keymap.set('n', ']h', '<cmd>:Gitsigns next_hunk<CR>'),
   vim.keymap.set('n', '[h', '<cmd>:Gitsigns prev_hunk<CR>'),
 
-  vim.keymap.set('n', '<leader>fn', '<cmd>enew<cr>', { desc = 'New File' }),
+  vim.keymap.set('n', '<leader>nf', '<cmd>enew<cr>', { desc = 'New File' }),
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
   -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
@@ -1001,6 +991,41 @@ require('lazy').setup({
     },
   },
 })
+
+-- vim.g.WK_DESC_NO_TEXT = { enabled = '', disabled = '' }
+
+local dap = require 'dap'
+dap.configurations.lua = {
+  {
+    name = 'Current file (local-lua-dbg, lua)',
+    type = 'local-lua',
+    request = 'launch',
+    cwd = '${workspaceFolder}',
+    program = {
+      lua = 'lua5.1',
+      file = '${file}',
+    },
+    args = {},
+  },
+}
+dap.adapters['local-lua'] = {
+  type = 'executable',
+  command = 'node',
+  args = {
+    '/home/andrea/git/local-lua-debugger-vscode/extension/debugAdapter.js',
+  },
+  enrich_config = function(config, on_config)
+    if not config['extensionPath'] then
+      local c = vim.deepcopy(config)
+      -- 💀 If this is missing or wrong you'll see
+      -- "module 'lldebugger' not found" errors in the dap-repl when trying to launch a debug session
+      c.extensionPath = '/home/andrea/git/local-lua-debugger-vscode/'
+      on_config(c)
+    else
+      on_config(config)
+    end
+  end,
+}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
