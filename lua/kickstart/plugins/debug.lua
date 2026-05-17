@@ -9,9 +9,7 @@
 ---@module 'lazy'
 ---@type LazySpec
 return {
-  -- NOTE: Yes, you can install new plugins here!
   'mfussenegger/nvim-dap',
-  -- NOTE: And you can specify dependencies as well
   dependencies = {
     -- Creates a beautiful debugger UI
     'rcarriga/nvim-dap-ui',
@@ -25,6 +23,7 @@ return {
 
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
+    -- 'mfussenegger/nvim-dap-python',
   },
   keys = {
     -- Basic debugging keymaps, feel free to change to your liking!
@@ -55,8 +54,39 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'python',
       },
     }
+
+    dap.adapters.python = function(cb, config)
+      if config.request == 'attach' then
+        local port = (config.connect or config).port
+        local host = (config.connect or config).host or '127.0.0.1'
+        local adapter = {
+          type = 'server',
+          port = assert(port, '`connect.port` is required for a python `attach` configuration'),
+          host = host,
+          --TODO: TODO
+          -- enrich_config = function(config, on_config) end,
+          options = {
+            source_filetype = 'python',
+          },
+        }
+        cb(adapter)
+      end
+    end
+
+    table.insert(dap.configurations.python, {
+      type = 'python',
+      request = 'attach',
+      name = 'attach',
+      connect = function()
+        local host = vim.fn.input 'Host [127.0.0.1]: '
+        host = host ~= '' and host or '127.0.0.1'
+        local port = tonumber(vim.fn.input 'Port [5678]: ') or 5678
+        return { host = host, port = port }
+      end,
+    })
 
     -- Dap UI setup
     -- For more information, see |:help nvim-dap-ui|
