@@ -24,17 +24,44 @@ return {
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
     -- 'mfussenegger/nvim-dap-python',
+
+    -- Add [d]ebug group
+    {
+      'folke/which-key.nvim',
+      opts = function(_, opts)
+        table.insert(opts['spec'], {
+          { '<leader>d', group = '[d]ebug', mode = { 'n' } },
+        })
+      end,
+    },
   },
   keys = {
-    -- Basic debugging keymaps, feel free to change to your liking!
-    { '<F5>', function() require('dap').continue() end, desc = 'Debug: Start/Continue' },
-    { '<F1>', function() require('dap').step_into() end, desc = 'Debug: Step Into' },
-    { '<F2>', function() require('dap').step_over() end, desc = 'Debug: Step Over' },
-    { '<F3>', function() require('dap').step_out() end, desc = 'Debug: Step Out' },
-    { '<leader>b', function() require('dap').toggle_breakpoint() end, desc = 'Debug: Toggle Breakpoint' },
-    { '<leader>B', function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end, desc = 'Debug: Set Breakpoint' },
-    -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-    { '<F7>', function() require('dapui').toggle() end, desc = 'Debug: See last session result.' },
+    -- [d]ebug group keys
+    { '<Leader>da', '<cmd>DapNew attach_all_code<CR>', desc = 'Attach, all code' },
+    { '<Leader>dA', '<cmd>DapNew attach_my_code<CR>', desc = 'Attach, my code' },
+    { '<leader>db', '<cmd>DapToggleBreakpoint<CR>', desc = 'Toggle breakpoint' },
+    { '<leader>dc', function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end, desc = "Conditional b'point" },
+    { '<leader>df', '<cmd>Telescope dap frames<CR>', desc = 'List frames' },
+    { '<leader>dl', '<cmd>Telescope dap list_breakpoints<CR>', desc = 'List breakpoints' },
+    { '<Leader>dL', function() require('dap').run_last() end, desc = 'Run last' },
+    { '<Leader>dr', '<cmd>DapToggleRepl<CR>', desc = 'Toggle repl' },
+    { '<Leader>dt', '<cmd>DapTerminate<CR>', desc = 'Terminate' },
+
+    -- We don't use F-keys, we use arrow keys (see event listeners below),
+    -- let's see how that goes...
+    -- -- Basic debugging keymaps, feel free to change to your liking!
+    -- { '<F5>', function() require('dap').continue() end, desc = 'Debug: Start/Continue' },
+    -- { '<F1>', function() require('dap').step_into() end, desc = 'Debug: Step Into' },
+    -- { '<F2>', function() require('dap').step_over() end, desc = 'Debug: Step Over' },
+    -- { '<F3>', function() require('dap').step_out() end, desc = 'Debug: Step Out' },
+    -- -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
+    -- { '<F7>', function() require('dapui').toggle() end, desc = 'Debug: See last session result.' },
+
+    -- TODO: Some things we could do in the future
+    --
+    -- `set_breakpoint()` offers quite some features we could use
+    -- set_breakpoint({condition}, {hit_condition}, {log_message})
+    -- { '<leader>dB', function() require('dap').set_breakpoint() end, desc = 'Set breakpoint' },
   },
   config = function()
     local dap = require 'dap'
@@ -139,9 +166,33 @@ return {
     --   vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
     -- end
 
-    dap.listeners.after.event_initialized['dapui_config'] = dapui.open
-    dap.listeners.before.event_terminated['dapui_config'] = dapui.close
-    dap.listeners.before.event_exited['dapui_config'] = dapui.close
+    -- Debug start callback
+    function dap_start_listener(session, payload)
+      -- Open DAP UI
+      dapui.open()
+
+      -- Set keymaps when debugging starts
+      vim.keymap.set('n', '<Right>', '<cmd>DapStepOver<CR>')
+      vim.keymap.set('n', '<Down>', '<cmd>DapStepInto<CR>')
+      vim.keymap.set('n', '<Up>', '<cmd>DapStepOut<CR>')
+      vim.keymap.set('n', '<Left>', '<cmd>DapRestartFrame<CR>')
+    end
+
+    function dap_stop_listener(session, payload)
+      -- Remove them when debugging ends
+      vim.keymap.del('n', '<Left>')
+      vim.keymap.del('n', '<Up>')
+      vim.keymap.del('n', '<Down>')
+      vim.keymap.del('n', '<Right>')
+
+      -- Close DAP UI
+      dapui.close()
+    end
+
+    -- Register DAP event listeners
+    dap.listeners.after.event_initialized['dapui_config'] = dap_start_listener
+    dap.listeners.before.event_terminated['dapui_config'] = dap_stop_listener
+    dap.listeners.before.event_exited['dapui_config'] = dap_stop_listener
 
     -- Install golang specific config
     require('dap-go').setup {
