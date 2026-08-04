@@ -48,6 +48,14 @@ return {
     },
     filesystem = {
       bind_to_cwd = true,
+      filtered_items = {
+        hide_dotfiles = false,
+        hide_gitignored = true,
+        always_show = {
+          '.clangd',
+          'compile_commands.json',
+        },
+      },
       follow_current_file = {
         enabled = true,
         leave_dirs_open = true,
