@@ -649,26 +649,9 @@ require('lazy').setup({
         },
         pylsp = {
           settings = {
+            -- https://github.com/python-lsp/python-lsp-server/blob/develop/CONFIGURATION.md
             pylsp = {
-              configurationSources = { 'flake8' },
-              -- https://github.com/python-lsp/python-lsp-server/blob/develop/CONFIGURATION.md
               plugins = {
-                -- formatter
-                autopep8 = { enabled = false },
-                -- black must be installed with 'lspinstall', see https://github.com/williamboman/mason-lspconfig.nvim
-                black = { enabled = true }, -- This is an external plugin
-                yapf = { enabled = false },
-                -- linter
-                flake8 = { enabled = true },
-                pycodestyle = { enabled = false },
-                pydocstyle = {
-                  enabled = false,
-                  convention = 'numpy',
-                  -- convention = "google",
-                  -- convention = "pep257",
-                },
-                pyflakes = { enabled = false },
-                pylint = { enabled = false },
                 -- type checker
                 pylsp_mypy = { enabled = true },
                 -- autocompletion
@@ -682,14 +665,18 @@ require('lazy').setup({
                     completions = { enabled = true },
                   },
                 },
-                -- other
-                mccabe = { enabled = false },
+                -- `pip install python-lsp-ruff` inside the mason python-lsp-server virtualenv
+                -- see https://github.com/python-lsp/python-lsp-ruff
+                ruff = {
+                  enabled = true, -- Enable the plugin
+                  formatEnabled = true, -- Enable formatting using ruffs formatter
+                  -- Ignored when a pyproject.toml or ruff.toml is present
+                  lineLength = 88, -- Line length to pass to ruff checking and formatting
+                },
               },
             },
           },
         },
-        -- Ruff is not (yet) able to refactor code
-        -- ruff = {},
       }
 
       -- Ensure the servers and tools above are installed
