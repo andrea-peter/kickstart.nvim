@@ -677,6 +677,9 @@ require('lazy').setup({
             },
           },
         },
+        rust_analyzer = {
+          enabled = true,
+        },
       }
 
       -- Ensure the servers and tools above are installed
