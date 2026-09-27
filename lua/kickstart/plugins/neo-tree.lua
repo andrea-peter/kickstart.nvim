@@ -53,6 +53,7 @@ return {
         hide_gitignored = true,
         always_show = {
           '.clangd',
+          '.nvim-dap.lua',
           'compile_commands.json',
         },
       },
