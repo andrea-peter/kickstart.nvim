@@ -42,6 +42,8 @@ return {
         ['h'] = 'close_node',
         -- Don't close neotree
         ['q'] = 'noop',
+        ['s'] = 'open_split',
+        ['v'] = 'open_vsplit',
         -- We use space as leader
         ['<space>'] = 'noop',
       },
